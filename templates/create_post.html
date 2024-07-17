@@ -1,0 +1,16 @@
+<!-- templates/create_post.html -->
+{% extends 'base.html' %}
+
+{% block title %}Create Post - Social Media App{% endblock %}
+
+{% block content %}
+    <h1>Create Post</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.content.label }}
+            {{ form.content(class="form-control", rows="5") }}
+        </div>
+        <button type="submit">Post</button>
+    </form>
+{% endblock %}

@@ -1,9 +1,10 @@
+# app.py
 from flask import Flask, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, login_user, current_user, logout_user, login_required
+from forms import RegistrationForm, LoginForm, PostForm
 from models import db, User, Post
-from forms import RegistrationForm, LoginForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -17,11 +18,13 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Routes
 @app.route('/')
 @app.route('/home')
+@login_required
 def home():
     posts = Post.query.all()
-    return render_template('index.html', posts=posts)
+    return render_template('home.html', posts=posts)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -60,6 +63,18 @@ def logout():
 @login_required
 def profile():
     return render_template('profile.html', username=current_user.username)
+
+@app.route('/create_post', methods=['GET', 'POST'])
+@login_required
+def create_post():
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(content=form.content.data, user_id=current_user.id)
+        db.session.add(post)
+        db.session.commit()
+        flash('Your post has been created!', 'success')
+        return redirect(url_for('home'))
+    return render_template('create_post.html', form=form)
 
 if __name__ == '__main__':
     app.run(debug=True)
